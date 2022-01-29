@@ -51,38 +51,5 @@ async def on_message(mess):
     #     await mess.channel.send("Shutting Down")
     #     client.close(token)
 
-    if mess.content.startswith("/add to list"):
-        pattern = '/add to list(.*)'
-        await mess.channel.send("This might take a moment")
-        message = re.findall(pattern, mess.content)
-        connection = pyodbc.connect('Driver={SQL Server};'
-            'Server=LAPTOP-NE5IT73K;'
-            'Database=ReasonsWhy;'
-            'Trusted_Connection=yes;')
-
-        cursor = connection.cursor()
-        cursor.execute("INSERT INTO reasons(Reason) VALUES('"+ message[0] +"')")
-        await mess.channel.send("Reason has been added to the list")
-        cursor.close()
-        connection.close()
-
-    if mess.content.startswith("/list why"):
-        pattern = '/list why(.*)'
-        print(mess)
-        reasonnumber = re.findall(pattern, mess.content)
-        # if len(reasonnumber) == 0:
-        print("test")
-        connection = pyodbc.connect('Driver={SQL Server};'
-            'Server=LAPTOP-NE5IT73K;'
-            'Database=ReasonsWhy;'
-            'Trusted_Connection=yes;')
-
-        cursor = connection.cursor()
-        cursor.execute("Select Reason from reasons")
-        for i in cursor:
-            await mess.channel.send(i)
-        cursor.close()
-        connection.close()
-        await mess.channel.send("That's why I'll always love Lonny")
 client.run(token)
 
