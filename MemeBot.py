@@ -1,24 +1,42 @@
-from email import message
+from email import header, message
+from fileinput import filename
 import getpass
+from multiprocessing import connection
 from re import template
 import traceback
-from urllib import request
+from urllib import request, response
 import requests
 import discord
 import random
 import time
+import pymysql.cursors
+import urllib
 
 imageURL = 'https://api.imgflip.com/get_memes'
 captionURL = 'https://api.imgflip.com/caption_image'
 TOKEN= 'OTQzMjY1NzI5NjA2NzIxNjY3.Ygwiqg.fNwEgbYGgHA77Bl8BBL6uK9UO5w'
 client = discord.Client()
-userAgent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) \
-    AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.117 \
-    Safari/537.36'
+userAgent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/98.0.4758.102 Safari/537.36 Edg/98.0.1108.56'
 
 savedMemes = ['https://i.imgflip.com/65qhkz.jpg']
 memeTerms = ['amogus', 'what are those!!!', 'Justin SUCKS']
-taunts = ['Are you even cracked a Fortnite?', 'I actually like Joe Rogan', 'What? Evvvveeeerrrrrrr', 'Justin SUCKS', 'Dick Rider in Chat']
+taunts = ['Are you even cracked at Fortnite?', 'I actually like Joe Rogan', 'What? Evvvveeeerrrrrrr', 'Justin SUCKS', 'Dick Rider in Chat']
+
+connection = pymysql.connect(
+    host='localhost', user='root', 
+    password='test', database='discordbot',
+    cursorclass=pymysql.cursors.DictCursor)
+
+def testConnection():
+    testCommand= "SELECT Joke FROM jokedata"
+    with connection.cursor() as cursor:
+        cursor.execute(testCommand)
+        result = cursor.fetchone()
+        print("Inside the with statement")
+        print(result)
+    connection.commit()
+
+
 
 def getMemes():
     re = requests.get(imageURL)
@@ -58,6 +76,13 @@ def generateMeme(text00,text01):
     image = setTheMeme(templateId,username1,passoword,text0,text1)
     return image
 
+def saveMemeToDB(URL):
+    insertCommand = "INSERT INTO `memedata` (`url`) VALUES (%s)"
+    with connection.cursor() as cursor:
+        cursor.execute(insertCommand,(URL))
+        print("Executed insert with %s", URL)
+    connection.commit()
+
 @client.event
 async def on_ready():
     print("We have logged in as {0.user}".format(client))
@@ -74,34 +99,23 @@ async def SendUserMeme(message, txt1 , txt2):
         await message.channel.send(memer)
 
 @client.event
-async def showMeTheSaveMemes(message):
+async def on_message(message):
     if message.author == client.user:
         return
-    if message.content.startswith('$SavedMemes'):
+    if message.content.startswith('$SM'):
         for i in savedMemes:
             await message.channel.send(i)
             time.sleep(0.85)
-
-@client.event
-async def tauntUser(message):
-    if message.author == client.user:
-        return
     if message.content.startswith('$taunt'):
         random.shuffle(taunts)
         await message.channel.send(taunts[0])
-
-
-@client.event
-async def backMeUp(message):
-    if message.author == client.user:
-        return
-    msg = message.content
-    if any(word in msg for word in memeTerms):
-        await message.send(random.choice(memeTerms))
-
+    if any(word in message.content for word in memeTerms):
+        await message.send(random.choice('Yeah' + memeTerms))
 
 
 print(savedMemes)
 print("--------------")
 
-client.run(TOKEN)
+testConnection()
+
+#client.run(TOKEN)
