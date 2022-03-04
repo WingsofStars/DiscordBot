@@ -1,8 +1,11 @@
+import imp
 import os
 import discord
 import requests
 import json 
 
+
+jokesToken = 'OTQxNTc2NTQ4NTI2NDg1NjI0.YgX9fg.KCcbMm5938evesD0aRQR9_kA_qg'
 client = discord.Client()
 def get_quote():
     headers = {'Accept': 'text/plain'}
@@ -41,4 +44,4 @@ async def on_message(message):
         response = requests.get('https://v2.jokeapi.dev/joke/Spooky?blacklistFlags=nsfw,religious,political,racist,sexist,explicit&format=txt')
         await message.channel.send(response.text)
 
-client.run(os.getenv('jokesToken'))
+client.run(jokesToken)
