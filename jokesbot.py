@@ -30,7 +30,7 @@ async def on_message(message):
 
     if message.content.lower().startswith('!dadjoke'):
         quote = get_quote()
-        await message.channel.send(quote)
+        await message.channel.send(quote) 
 
     if message.content.lower().startswith('!projoke'):
         response = requests.get('https://v2.jokeapi.dev/joke/Programming?blacklistFlags=nsfw,religious,political,racist,sexist,explicit&format=txt')
