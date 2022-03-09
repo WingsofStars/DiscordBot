@@ -33,7 +33,7 @@ savedMemes = ['https://i.imgflip.com/65qhkz.jpg']
 
 memeTerms = ['amogus', 'what are those!!!', 'Justin SUCKS']
 
-taunts = ['Are you even cracked at Fortnite?', 'I actually like Joe Rogan', 'What? Evvvveeeerrrrrrr', 'Justin SUCKS', 'Dick Rider in Chat']
+taunts = ['Are you even cracked at Fortnite?', 'I actually like Joe Rogan', 'What? Evvvveeeerrrrrrr', 'Justin SUCKS']
 
 vids = ["https://youtube.com/shorts/6JJb61rUSr0?feature=share", "https://youtube.com/shorts/IYfils4Vdqc?feature=share","https://youtube.com/shorts/HkGTdkjfKX0?feature=share","https://youtube.com/shorts/eSL7bxlVFKI?feature=share"]
 
