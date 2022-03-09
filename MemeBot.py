@@ -6,7 +6,9 @@ import math
 from multiprocessing import connection
 from re import template
 import traceback
+from turtle import title
 from urllib import request, response
+from numpy import imag
 import requests
 import discord
 import random
@@ -33,6 +35,10 @@ memeTerms = ['amogus', 'what are those!!!', 'Justin SUCKS']
 
 taunts = ['Are you even cracked at Fortnite?', 'I actually like Joe Rogan', 'What? Evvvveeeerrrrrrr', 'Justin SUCKS', 'Dick Rider in Chat']
 
+vids = ["https://youtube.com/shorts/6JJb61rUSr0?feature=share", "https://youtube.com/shorts/IYfils4Vdqc?feature=share","https://youtube.com/shorts/HkGTdkjfKX0?feature=share","https://youtube.com/shorts/eSL7bxlVFKI?feature=share"]
+
+beetleVids =["https://youtube.com/shorts/WrwizsruqFk?feature=share", "https://youtube.com/shorts/xun3qa09M5E?feature=share", "https://youtu.be/6F95B5Hpluc", "https://youtube.com/shorts/R00TdFwu1bA?feature=share", "https://youtube.com/shorts/eSL7bxlVFKI?feature=share", "https://youtube.com/shorts/yUpR6vhNfCE?feature=share" ]
+
 redditMemes = []
 videoIn = 0
 
@@ -47,89 +53,9 @@ def DownloadResource(url, num):
     stream = video.streams.get_lowest_resolution()
     downloaded = stream.download()
     downloaded = os.rename(downloaded, f"Video{videoIn}.mp4")
-    compress_video(f"{downloaded}.mp4", 50 * 1000)
+    #compress_video(f"{downloaded}.mp4", 50 * 1000)
     num+= 1
     print("Completed Download")
-
-
-def compress_video(video_full_path, size_upper_bound, two_pass=True, filename_suffix='1'):
-    """
-    Compress video file to max-supported size.
-    :param video_full_path: the video you want to compress.
-    :param size_upper_bound: Max video size in KB.
-    :param two_pass: Set to True to enable two-pass calculation.
-    :param filename_suffix: Add a suffix for new video.
-    :return: out_put_name or error
-    """
-    filename, extension = os.path.splitext(video_full_path)
-    extension = '.mp4'
-    output_file_name = filename + filename_suffix + extension
-
-    total_bitrate_lower_bound = 11000
-    min_audio_bitrate = 32000
-    max_audio_bitrate = 256000
-    min_video_bitrate = 100000
-
-    try:
-        # Bitrate reference: https://en.wikipedia.org/wiki/Bit_rate#Encoding_bit_rate
-        probe = ffmpeg.probe(video_full_path)
-        # Video duration, in s.
-        duration = float(probe['format']['duration'])
-        # Audio bitrate, in bps.
-        audio_bitrate = float(next((s for s in probe['streams'] if s['codec_type'] == 'audio'), None)['bit_rate'])
-        # Target total bitrate, in bps.
-        target_total_bitrate = (size_upper_bound * 1024 * 8) / (1.073741824 * duration)
-        if target_total_bitrate < total_bitrate_lower_bound:
-            print('Bitrate is extremely low! Stop compress!')
-            return False
-
-        # Best min size, in kB.
-        best_min_size = (min_audio_bitrate + min_video_bitrate) * (1.073741824 * duration) / (8 * 1024)
-        if size_upper_bound < best_min_size:
-            print('Quality not good! Recommended minimum size:', '{:,}'.format(int(best_min_size)), 'KB.')
-            # return False
-
-        # Target audio bitrate, in bps.
-        audio_bitrate = audio_bitrate
-
-        # target audio bitrate, in bps
-        if 10 * audio_bitrate > target_total_bitrate:
-            audio_bitrate = target_total_bitrate / 10
-            if audio_bitrate < min_audio_bitrate < target_total_bitrate:
-                audio_bitrate = min_audio_bitrate
-            elif audio_bitrate > max_audio_bitrate:
-                audio_bitrate = max_audio_bitrate
-
-        # Target video bitrate, in bps.
-        video_bitrate = target_total_bitrate - audio_bitrate
-        if video_bitrate < 1000:
-            print('Bitrate {} is extremely low! Stop compress.'.format(video_bitrate))
-            return False
-
-        i = ffmpeg.input(video_full_path)
-        if two_pass:
-            ffmpeg.output(i, '/dev/null' if os.path.exists('/dev/null') else 'NUL',
-                          **{'c:v': 'libx264', 'b:v': video_bitrate, 'pass': 1, 'f': 'mp4'}
-                        ).overwrite_output().run()
-            ffmpeg.output(i, output_file_name,
-                          **{'c:v': 'libx264', 'b:v': video_bitrate, 'pass': 2, 'c:a': 'aac', 'b:a': audio_bitrate}
-                        ).overwrite_output().run()
-        else:
-            ffmpeg.output(i, output_file_name,
-                          **{'c:v': 'libx264', 'b:v': video_bitrate, 'c:a': 'aac', 'b:a': audio_bitrate}
-                        ).overwrite_output().run()
-
-        if os.path.getsize(output_file_name) <= size_upper_bound * 1024:
-            return output_file_name
-        elif os.path.getsize(output_file_name) < os.path.getsize(video_full_path):  # Do it again
-            return compress_video(output_file_name, size_upper_bound)
-        else:
-            return False
-    except FileNotFoundError as e:
-        print('You do not have ffmpeg installed!', e)
-        print('You can install ffmpeg by reading https://github.com/kkroening/ffmpeg-python/issues/251')
-        return False
-
 
 
 def testConnection():
@@ -143,7 +69,7 @@ def testConnection():
 
 def fetchFromReddit(num):
     reddit = praw.Reddit(client_id= "ObhD_U7a18iaZmuJOJUHiQ", client_secret="JjAdqGTayoWvcHj06qvEAaeJgsNOIQ", username="Psychological_Page89", password="Test1234", user_agent="pythonpraw")
-    subReddits = ["EarthPorn", "funny", "wholesomememes"]
+    subReddits = ["memes", "funny", "wholesomememes","programmingmemes"]
     if num == 1:
         sub_reddit = reddit.subreddit(subReddits[0])
         top = sub_reddit.top(limit=5)
@@ -162,12 +88,13 @@ def fetchFromReddit(num):
         for info in top:
             redditMemes.append(info)
         return redditMemes
+    if num == 4:
+        sub_reddit = reddit.subreddit(subReddits[3])
+        top = sub_reddit.top(limit=5)
+        for info in top:
+            redditMemes.append(info)
+        return redditMemes
 
-
-def getMemes():
-    re = requests.get(imageURL)
-    data = re.json()
-    return data['data']['memes']
 
 def setTheMeme(templateId, username, password, text0, text1):
     data = {
@@ -200,7 +127,7 @@ def generateMeme(text00,text01):
     text0 = text00
     text1 = text01
     image = setTheMeme(templateId,username1,passoword,text0,text1)
-
+    saveMemeToDB(image)
     return image
 
 def saveMemeToDB(URL):
@@ -211,7 +138,12 @@ def saveMemeToDB(URL):
     connection.commit()
 
 
-DownloadResource("https://www.youtube.com/watch?v=cdwal5Kw3Fc",videoIn)
+#DownloadResource("https://www.youtube.com/watch?v=cdwal5Kw3Fc",videoIn)
+
+def shuffleVid():
+    data = random.choice(beetleVids)
+    return data
+
 
 
 @client.event
@@ -219,12 +151,15 @@ async def on_ready():
     print("We have logged in as {0.user}".format(client))
 
 
-@bot.command(pass_context=True)
-async def send(ctx):
-    await ctx.channel.send(r"C:\\Users\\jedominguez\\Documents\\GitHub\\DiscordBot\\Video0.zip", filename="Test", content="Testing")
+# @bot.command(pass_context=True)
+# async def send(ctx):
+#     await ctx.channel.send(r"C:\\Users\\jedominguez\\Documents\\GitHub\\DiscordBot\\Video0.zip", filename="Test", content="Testing")
 
 @client.event
 async def on_message(message):
+    uno = ["uno reverse", "reverse", "Uno reverse"]
+    bb = ["!beetlejuice", "!Beetlejuice", "beetlejuice", "BeetleJuice", "beetle juice", "Beetle juice"]
+    
     if message.author == client.user:
         return
     if message.content.startswith('$SM'):
@@ -237,15 +172,13 @@ async def on_message(message):
         await message.channel.send(taunts[0])
     
     if any(word in message.content for word in memeTerms):
-        await message.channel.send(random.choice('Yeah' + memeTerms))
+        await message.channel.send(f'Yeah {message.content}')
     
-    if message.content.startswith('!hello'):
-        embedVar = discord.Embed(title="YouTube video player", description="Frugal Aset", color=0x00ff00)
-        embedVar.add_field(name="URL", value="https://www.youtube.com/embed/aYaSgEB0JA0", inline=False)
-        embedVar.add_field(name="Field2", value="hi2", inline=False)
-        await message.channel.send(embed=embedVar)
+    if any(word in message.content for word in bb):
+        data = random.choice(beetleVids)
+        await message.channel.send(data)
     
-    if message.content.startswith('r/EarthPorn'):
+    if message.content.startswith('r/memes'):
         data = fetchFromReddit(1)
         data = random.choice(data)
         EarthTitle = data.title
@@ -271,6 +204,20 @@ async def on_message(message):
         WH = discord.Embed(title=WHTitle)
         WH.set_image(url=WHUrl)
         await message.channel.send(embed=WH)
+
+
+    if message.content.startswith('r/ProgrammingMemes'):
+        data = fetchFromReddit(4)
+        data = random.choice(data)
+        PTitle = data.title
+        PUrl = data.url
+        P = discord.Embed(title=PTitle)
+        P.set_image(url=PUrl)
+        await message.channel.send(embed=P)
+    
+    if any(word in message.content for word in uno):
+        await message.channel.send("https://tenor.com/view/reverse-card-uno-uno-cards-gif-13032597")
+
 
 
 client.run(TOKEN)
