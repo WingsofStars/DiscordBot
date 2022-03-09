@@ -16,7 +16,7 @@ spambotNameList = ["Botbot", "botbot",
                    "Bot Bot", "bot bot", "bot Bot", "Bot bot"]
 hellolist = ["/Hello"]
 GreetingsList = ["hi ", "Hi ", "HI ", "YO ", "yo ",
-                 "Yo ", "Sup ", "Hello ", "hello ", "sup "]
+                 "Yo ", "Sup ", "Hello ", "hello ", "sup ", "hey ", "Hey ", "HEY "]
 spamCommandList = ["/spam", "/Spam", "/SPAM"]
 
 for names in spambotNameList:
@@ -40,13 +40,13 @@ async def on_message(mess):
         print(mess)
         await mess.channel.send("Hello there {0.author.name} >.<".format(mess))
 
-    if mess.content.startswith("/spam"):
+    if mess.content.lower().startswith("/spam"):
         for i in range(100):
             pattern = '/spam(.*)'
-            word = re.findall(pattern, mess.content)
+            word = re.findall(pattern, mess.content, re.IGNORECASE)
             await mess.channel.send(word[0])
             time.sleep(0.75)
-        await mess.channel.send("Made with Memesin mind")
+        await mess.channel.send("Made with Memes in mind")
     # if mess.content.startswith("/SpamBot -shutdown -4351"):
     #     await mess.channel.send("Shutting Down")
     #     client.close(token)

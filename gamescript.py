@@ -1,126 +1,156 @@
-from http import client
+from pickle import TRUE
+from unittest import async_case
 import discord
+from discord.ext import commands
+from config import *
 import random
-from dotenv import load_dotenv 
-import os
+import giphy_client
+from giphy_client.rest import ApiException
 
-isInGame = False
 
-load_dotenv()
-token = os.environ.get("TOKEN")
-client=discord.Client()
+bot=commands.Bot(command_prefix=PREFIX,description='ROCK-PAPER-SCISSORS BOT')
 
-@client.event
+@bot.event
 async def on_ready():
-    print('We have logged in as {0.user}'
-    .format(client))
-
-@client.event
-async def on_message(message):
-    if message.author==client.user:
-        return
-
-    if message.content.startswith('$game'):
-        choices = ["rock","paper","scissors"]
-        computer = random.choice(choices)
-        player = None
-
-        isInGame = True
-
-        await message.channel.send("rock, paper, or scissors?: ")
-        if message.content.startswith('!rock'):
-            player="rock"
-            print("player is rock")
-        if message.content.startswith('!paper'):
-            player="paper"
-            print("player is paper")
-        if message.content.startswith('!scissors'):
-            player="scissors"
-            print("player is scissors")
-
-        if player == computer:
-                await message.channel.send("computer: ",computer)
-                await message.channel.send("player: ",player)
-                await message.channel.send("Tie!")
-
-        elif player == "rock":
-            if computer == "paper":
-                await message.channel.send("computer: ", computer)
-                await message.channel.send("player: ", player)
-                await message.channel.send("You lose!")
-            if computer == "scissors":
-                await message.channel.send("computer: ", computer)
-                await message.channel.send("player: ", player)
-                await message.channel.send("You win!")
-
-        elif player == "scissors":
-            if computer == "rock":
-                await message.channel.send("computer: ", computer)
-                await message.channel.send("player: ", player)
-                await message.channel.send("You lose!")
-            if computer == "paper":
-                await message.channel.send("computer: ", computer)
-                await message.channel.send("player: ", player)
-                await message.channel.send("You win!")
-
-        elif player == "paper":
-            if computer == "scissors":
-                await message.channel.send("computer: ", computer)
-                await message.channel.send("player: ", player)
-                await message.channel.send("You lose!")
-            if computer == "rock":
-                await message.channel.send("computer: ", computer)
-                await message.channel.send("player: ", player)
-                await message.channel.send("You win!")
+    print("Game Bot has started")
 
 
-        # while True:
-        #     choices = ["rock","paper","scissors"]
-        #     computer = random.choice(choices)
-        #     player = None
+@bot.command(pass_context=True)
+async def start(ctx):
+    await ctx.send("Rock,Paper, or Scissors?")
+    await ctx.send("To enter choice use !shoot (Your Choice)")
 
-        #     while player not in choices:
+@bot.command(pass_context=True)
+async def gif(ctx,*,q="Tie"):
+    api_key='TUGOCGmdycOCIMR7h5sXX7IFBLPvOSd7'
+    api_instance=giphy_client.DefaultApi()
 
-        #         # player = input("rock, paper, or scissors?: ").lower()
+    try:
+        api_response=api_instance.gifs_search_get(api_key,q,limit=5,rating='r')
+        lst=list(api_response.data)
+        giff=random.choice(lst)
 
-        #     if player == computer:
-        #         print("computer: ",computer)
-        #         print("player: ",player)
-        #         print("Tie!")
+        await ctx.channel.send(giff.embed_url)
 
-        #     elif player == "rock":
-        #         if computer == "paper":
-        #             print("computer: ", computer)
-        #             print("player: ", player)
-        #             print("You lose!")
-        #         if computer == "scissors":
-        #             print("computer: ", computer)
-        #             print("player: ", player)
-        #             print("You win!")
+    except ApiException as e:
+        print("Exceptio when Giffing")
 
-        #     elif player == "scissors":
-        #         if computer == "rock":
-        #             print("computer: ", computer)
-        #             print("player: ", player)
-        #             print("You lose!")
-        #         if computer == "paper":
-        #             print("computer: ", computer)
-        #             print("player: ", player)
-        #             print("You win!")
+@bot.command(pass_context=True)
+async def shoot(ctx, uinput:str):
+    api_key='TUGOCGmdycOCIMR7h5sXX7IFBLPvOSd7'
+    api_instance=giphy_client.DefaultApi()
+    q=""
 
-        #     elif player == "paper":
-        #         if computer == "scissors":
-        #             print("computer: ", computer)
-        #             print("player: ", player)
-        #             print("You lose!")
-        #         if computer == "rock":
-        #             print("computer: ", computer)
-        #             print("player: ", player)
-        #             print("You win!")
+    choices = ["rock","paper","scissors"]
 
-        #     play_again = input("Play again? (yes/no): ").lower()
+    computer = random.choice(choices)
+    player = uinput.lower()
 
-        #     if play_again != "yes":
-        #         break
+    if player == computer:
+        # await ctx.send("computer: ",computer)
+        # await ctx.send("player: ",player)
+        await ctx.send("Tie!\nComputer: "+computer+"\nPlayer: "+player)
+        q="Tie"
+        try:
+            api_response=api_instance.gifs_search_get(api_key,q,limit=5,rating='r')
+            lst=list(api_response.data)
+            giff=random.choice(lst)
 
-client.run(token)
+            await ctx.channel.send(giff.embed_url)
+
+        except ApiException as e:
+            print("Exceptio when Giffing")
+
+    elif player == "rock":
+        if computer == "paper":
+            # await ctx.send("computer: ", computer)
+            # await ctx.send("player: ", player)
+            await ctx.send("You lose!\nComputer: "+computer+"\nPlayer: "+player)
+            q="Loser"
+            try:
+                api_response=api_instance.gifs_search_get(api_key,q,limit=5,rating='r')
+                lst=list(api_response.data)
+                giff=random.choice(lst)
+
+                await ctx.channel.send(giff.embed_url)
+
+            except ApiException as e:
+                print("Exceptio when Giffing")
+        if computer == "scissors":
+            # await ctx.send("computer: ", computer)
+            # await ctx.send("player: ", player)
+            await ctx.send("You win!\nComputer: "+computer+"\nPlayer: "+player)
+            q="Winner"
+            try:
+                api_response=api_instance.gifs_search_get(api_key,q,limit=5,rating='r')
+                lst=list(api_response.data)
+                giff=random.choice(lst)
+
+                await ctx.channel.send(giff.embed_url)
+
+            except ApiException as e:
+                print("Exceptio when Giffing")
+
+    elif player == "scissors":
+        if computer == "rock":
+            # await ctx.send("computer: ", computer)
+            # await ctx.send("player: ", player)
+            await ctx.send("You lose!\nComputer: "+computer+"\nPlayer: "+player)
+            q="Loser"
+            try:
+                api_response=api_instance.gifs_search_get(api_key,q,limit=5,rating='r')
+                lst=list(api_response.data)
+                giff=random.choice(lst)
+
+                await ctx.channel.send(giff.embed_url)
+
+            except ApiException as e:
+                print("Exceptio when Giffing")
+        if computer == "paper":
+            # await ctx.send("computer: ", computer)
+            # await ctx.send("player: ", player)
+            await ctx.send("You win!\nComputer: "+computer+"\nPlayer: "+player)
+            q="Winner"
+            try:
+                api_response=api_instance.gifs_search_get(api_key,q,limit=5,rating='r')
+                lst=list(api_response.data)
+                giff=random.choice(lst)
+
+                await ctx.channel.send(giff.embed_url)
+
+            except ApiException as e:
+                print("Exceptio when Giffing")
+
+    elif player == "paper":
+        if computer == "scissors":
+            # await ctx.send("computer: ", computer)
+            # await ctx.send("player: ", player)
+            await ctx.send("You lose!\nComputer: "+computer+"\nPlayer: "+player)
+            q="Loser"
+            try:
+                api_response=api_instance.gifs_search_get(api_key,q,limit=5,rating='r')
+                lst=list(api_response.data)
+                giff=random.choice(lst)
+
+                await ctx.channel.send(giff.embed_url)
+
+            except ApiException as e:
+                print("Exceptio when Giffing")
+        if computer == "rock":
+            # await ctx.send("computer: ", computer)
+            # await ctx.send("player: ", player)
+            await ctx.send("You win!\nComputer: "+computer+"\nPlayer: "+player)
+            q="Winner"
+            try:
+                api_response=api_instance.gifs_search_get(api_key,q,limit=5,rating='r')
+                lst=list(api_response.data)
+                giff=random.choice(lst)
+
+                await ctx.channel.send(giff.embed_url)
+
+            except ApiException as e:
+                print("Exceptio when Giffing")
+
+
+
+bot.run(TOKEN,bot=True,reconnect=True)
